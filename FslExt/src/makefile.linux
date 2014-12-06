@@ -1,0 +1,49 @@
+#
+#    Copyright (C) 2013 by Freescale Semiconductor, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the license, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+.PHONY: all clean install
+
+include ./makefile.tc
+
+target := libfsl_x11_ext.so
+
+OBJS := fsl_pixmap_ext.o \
+
+# macro FREESCALE_EXTENSION is reserved for future use
+LOCAL_CFLAGS += -fPIC 
+LOCAL_CFLAGS += -I. -I.. -I$(sysroot)/usr/include -I$(sysroot)/usr/include/xorg
+LOCAL_CFLAGS += -I$(sysroot)/usr/include/drm
+
+LOCAL_LFLAGS += -fPIC
+LOCAL_LFLAGS += -L$(sysroot)/usr/lib -lGAL -lXext -lX11 -lc -Wl,-soname -Wl,libfsl_x11_ext.so
+
+all: $(target)
+
+$(target): $(OBJS)
+	$(LD) -shared -fPIC -o $(target) $(OBJS) $(LOCAL_LFLAGS) $(LFLAGS)
+
+clean:
+	-@rm $(target) $(OBJS)
+
+install:
+	mkdir -p $(prefix)/lib/
+	cp $(target) $(prefix)/lib/
+
+%.o: %.c
+	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
+

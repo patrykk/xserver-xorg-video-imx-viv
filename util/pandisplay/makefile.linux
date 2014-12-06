@@ -1,0 +1,54 @@
+#
+#    Copyright (C) 2014 by Freescale Semiconductor, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the license, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+.PHONY: all clean install
+
+include ./makefile.tc
+
+target := pandisplay
+
+OBJS := pandisplay.o \
+
+# macro FREESCALE_EXTENSION is reserved for future use
+LOCAL_CFLAGS += -fvisibility=hidden -fPIC -DPIC -DFREESCALE_EXTENSION
+LOCAL_CFLAGS += -I. -I.. -I$(sysroot)/usr/include -I$(sysroot)/usr/include/xorg
+
+
+
+LOCAL_LFLAGS += -fPIC
+LOCAL_LFLAGS += -L$(sysroot)/usr/lib -lX11 -lXext
+
+all: $(target)
+
+$(target): $(OBJS)
+	$(LD) -fPIC -o $(target) $(OBJS) $(LOCAL_LFLAGS) $(LFLAGS)
+
+clean:
+	-@rm $(target) $(OBJS)
+
+install:
+	mkdir -p $(prefix)/bin
+	cp $(target) $(prefix)/bin/
+	chmod 700 $(prefix)/bin/${target}
+
+%.o: %.cpp
+	$(C++) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
+
+%.o: %.c
+	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
+

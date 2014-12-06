@@ -1,0 +1,73 @@
+#
+#    Copyright (C) 2013 by Freescale Semiconductor, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the license, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+#
+
+.PHONY: all clean install
+
+CC  := $(CROSS_COMPILE)gcc
+LD  := $(CROSS_COMPILE)gcc 
+
+target := libdri.so
+
+OBJS := dri.o \
+	drimodule.o \
+	xf86dri.o \
+
+PIXMAN := pixman-1
+
+prefix ?= /usr
+sysroot ?= /
+
+ifeq ($(SWAP_SINGLE_PARAMETER),1)
+CFLAGS  += -DSWAP_SINGLE_PARAMETER
+endif
+
+ifeq ($(BUILD_HARD_VFP),1)
+CFLAGS += -mfpu=vfp -mfloat-abi=hard
+else
+CFLAGS += -mfpu=vfp -mfloat-abi=softfp
+endif
+
+CFLAGS += -fvisibility=hidden -fPIC -DPIC
+CFLAGS += -I. -I.. -I$(sysroot)/usr/include -I$(sysroot)/usr/include/xorg -I$(sysroot)/usr/include/$(PIXMAN)
+CFLAGS += -I../../EXA/src/vivante_gal
+CFLAGS += -march=armv7-a
+CFLAGS += -marm
+# -Wa,-mimplicit-it=thumb
+
+
+#LFLAGS += -lGAL -lm -ldl -ldrm -lX11 -module -Wl,-soname -Wl,$(target) -Wl,-rpath,/usr/lib/xorg/modules/extensions
+#LFLAGS += -lGAL -lm -ldl -ldrm -lX11 -module -Wl,-soname -Wl,$(target)
+LFLAGS += -L$(sysroot)/usr/lib -lGAL -lm -ldl -ldrm -lX11 -Wl,-soname -Wl,$(target)
+
+all: $(target)
+
+$(target): $(OBJS)
+	$(LD) -shared -fPIC -o $(target) $(OBJS) $(LFLAGS)
+
+clean:
+	-@rm $(target) $(OBJS)
+
+install:
+	mkdir -p $(prefix)/lib/xorg/modules/extensions/
+	cp $(target) $(prefix)/lib/xorg/modules/extensions/
+
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+

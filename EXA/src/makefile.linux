@@ -1,0 +1,76 @@
+#
+#    Copyright (C) 2013 by Freescale Semiconductor, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the license, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+.PHONY: all clean install
+
+include ./makefile.tc
+
+target := vivante_drv.so
+
+OBJS := vivante_gal/vivante_gal_blit.o \
+	vivante_gal/vivante_gal_gpu.o \
+	vivante_gal/vivante_gal_surface.o \
+	vivante_fbdev/vivante_fbdev_driver.o \
+	vivante_exa/vivante_exa.o \
+	vivante_exa/vivante_solid.o \
+	vivante_exa/vivante_copy.o \
+	vivante_exa/vivante_composite.o \
+	vivante_exa/vivante_pixmap.o \
+	vivante_extension/vivante_ext.o \
+	vivante_fbdev/vivante_dri.o \
+	vivante_util/logger.o \
+	vivante_fbdev/imx_display.o \
+
+PIXMAN := pixman-1
+
+ifeq ($(NODRI),1)
+LOCAL_CFLAGS += -DDISABLE_VIVANTE_DRI
+endif
+
+ifeq ($(XSERVER_GREATER_THAN_13),1)
+LOCAL_CFLAGS += -DFIX_NO_MI_BACKINGSTORE
+endif
+
+ifeq ($(BUSID_HAS_NUMBER),1)
+LOCAL_CFLAGS  += -DBUSID_HAS_NUMBER
+endif
+
+# macro FREESCALE_EXTENSION is reserved for future use
+LOCAL_CFLAGS += -fvisibility=hidden -fPIC -DPIC -DFREESCALE_EXTENSION
+LOCAL_CFLAGS += -I. -I.. -I$(sysroot)/usr/include -I$(sysroot)/usr/include/xorg -I$(sysroot)/usr/include/$(PIXMAN)
+LOCAL_CFLAGS += -I./vivante_gal -I./vivante_fbdev -I./vivante_util -I./vivante_exa -I./vivante_extension
+LOCAL_CFLAGS += -I$(sysroot)/usr/include/drm
+
+LOCAL_LFLAGS += -fPIC
+LOCAL_LFLAGS += -L$(sysroot)/usr/lib -lm -ldl -lGAL -Wl,-soname -Wl,vivante_drv.so
+
+all: $(target)
+
+$(target): $(OBJS)
+	$(LD) -shared -fPIC -o $(target) $(OBJS) $(LOCAL_LFLAGS) $(LFLAGS)
+
+clean:
+	-@rm $(target) $(OBJS)
+
+install:
+	mkdir -p $(prefix)/lib/xorg/modules/drivers/
+	cp $(target) $(prefix)/lib/xorg/modules/drivers/
+
+%.o: %.c
+	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) -o $@ -c $<
+

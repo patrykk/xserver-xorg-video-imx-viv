@@ -1,0 +1,59 @@
+#
+#    Copyright (C) 2013 by Freescale Semiconductor, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the license, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+ifeq ($(BUILD_IN_YOCTO),1)
+
+# yocto build system (not yocto sdk), use external settings
+# override LD with CC here
+LD := $(CC)
+
+else
+
+# if CROSS_COMPILE is set, then it is cross build
+CC  := $(CROSS_COMPILE)gcc
+LD  := $(CROSS_COMPILE)gcc
+
+ifeq ($(BUILD_HARD_VFP),1)
+CFLAGS += -mfpu=vfp -mfloat-abi=hard
+else
+CFLAGS += -mfpu=vfp -mfloat-abi=softfp
+endif
+
+CFLAGS += -march=armv7-a
+CFLAGS += -marm
+
+CFLAGS += -O2
+
+endif
+
+# strict check
+CFLAGS += -Werror
+
+# prefix: install path. This driver will be copied to $(prefix)/lib/xorg/modules/drivers/
+# when call make -f makefile.linux prefix=... install
+prefix ?= /usr
+
+# sysroot: compiler need this path to search header and library files
+sysroot ?= /
+
+# get git commit number
+COMMITNR := `git log -n 1 --format=%H`
+DIRTY := `git diff-index --quiet HEAD || echo '-dirty'`
+LOCAL_CFLAGS += -DCOMMIT="${COMMITNR}${DIRTY}"
+
+
