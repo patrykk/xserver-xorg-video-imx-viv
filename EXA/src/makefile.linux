@@ -54,7 +54,7 @@ endif
 LOCAL_CFLAGS += -fvisibility=hidden -fPIC -DPIC -DFREESCALE_EXTENSION
 LOCAL_CFLAGS += -I. -I.. -I$(sysroot)/usr/include -I$(sysroot)/usr/include/xorg -I$(sysroot)/usr/include/$(PIXMAN)
 LOCAL_CFLAGS += -I./vivante_gal -I./vivante_fbdev -I./vivante_util -I./vivante_exa -I./vivante_extension
-LOCAL_CFLAGS += -I$(sysroot)/usr/include/drm
+LOCAL_CFLAGS += -I$(sysroot)/usr/include/libdrm
 
 LOCAL_LFLAGS += -fPIC
 LOCAL_LFLAGS += -L$(sysroot)/usr/lib -lm -ldl -lGAL -Wl,-soname -Wl,vivante_drv.so

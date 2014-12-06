@@ -120,7 +120,7 @@ static Bool tearingWrapSurfaces(ScrnInfoPtr pScrn);
 
 static Bool noVIVExtension;
 
-static ExtensionModule VIVExt =
+static ExtensionModule VIVExts[] = {
 {
 	VIVExtensionInit,
 	VIVEXTNAME,
@@ -130,6 +130,7 @@ static ExtensionModule VIVExt =
 	NULL,
 	NULL
 #endif
+}
 };
 
 Bool vivEnableCacheMemory = TRUE;
@@ -266,7 +267,7 @@ FBDevSetup(pointer module, pointer opts, int *errmaj, int *errmin)
         setupDone = TRUE;
         xf86AddDriver(&FBDEV, module, HaveDriverFuncs);
         if(gVivFb)
-            LoadExtension(&VIVExt, FALSE);
+            LoadExtensionList(VIVExts, ARRAY_SIZE(VIVExts), FALSE);
 		return (pointer)1;
     } else {
         if (errmaj) *errmaj = LDR_ONCEONLY;
@@ -1038,9 +1039,9 @@ FBDevScreenInit(SCREEN_INIT_ARGS_DECL)
     }
 
     xf86SetBlackWhitePixels(pScreen);
-#if !defined(FIX_NO_MI_BACKINGSTORE)
-    miInitializeBackingStore(pScreen);
-#endif
+//#if !defined(FIX_NO_MI_BACKINGSTORE)
+//    miInitializeBackingStore(pScreen);
+//#endif
     xf86SetBackingStore(pScreen);
 
     if(gVivFb)
@@ -1635,7 +1636,7 @@ static Bool
 RestoreSyncFlags(ScrnInfoPtr pScrn)
 {
     if(gEnableFbSyncExt) {
-        char *modeName = "current";
+        const char *modeName = "current";
         unsigned int fbSync = 0;
         if(pScrn->currentMode)
             modeName = pScrn->currentMode->name;

@@ -55,6 +55,11 @@
 #include "vivante_priv.h"
 #include "vivante_common.h"
 
+//COMPATIBILITY PATCH
+#define _swapl(x, n) swapl(x)
+#define _swaps(x, n) swaps(x)
+
+
 static unsigned char VIVEXTReqCode = 0;
 static int VIVEXTErrorBase;
 
@@ -687,10 +692,10 @@ ProcVIVEXTPixmapPhysaddr(register ClientPtr client)
 		swapl(&rep.PixmapPhysaddr);
 		swapl(&rep.pixmapStride);
 #else
-		swaps(&rep.sequenceNumber, n);
-		swapl(&rep.length, n);
-		swapl(&rep.PixmapPhysaddr, n);
-		swapl(&rep.pixmapStride, n);
+		_swaps(&rep.sequenceNumber, n);
+		_swapl(&rep.length, n);
+		_swapl(&rep.PixmapPhysaddr, n);
+		_swapl(&rep.pixmapStride, n);
 #endif
 	}
 
@@ -879,11 +884,11 @@ ProcVIVEXTQueryVersion(
 		swaps(&rep.minorVersion);
 		swapl(&rep.patchVersion);
 #else
-		swaps(&rep.sequenceNumber, n);
-		swapl(&rep.length, n);
-		swaps(&rep.majorVersion, n);
-		swaps(&rep.minorVersion, n);
-		swapl(&rep.patchVersion, n);
+		_swaps(&rep.sequenceNumber, n);
+		_swapl(&rep.length, n);
+		_swaps(&rep.majorVersion, n);
+		_swaps(&rep.minorVersion, n);
+		_swapl(&rep.patchVersion, n);
 #endif
 	}
 
@@ -907,7 +912,7 @@ SProcVIVEXTQueryVersion(
 #if XORG_VERSION_CURRENT > XORG_VERSION_NUMERIC(1,12,0,0,0)
 	swaps(&stuff->length);
 #else
-	swaps(&stuff->length, n);
+	_swaps(&stuff->length, n);
 #endif
 	return ProcVIVEXTQueryVersion(client);
 }

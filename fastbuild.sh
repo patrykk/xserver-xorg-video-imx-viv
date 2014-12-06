@@ -46,12 +46,11 @@
 # bash>sudo ./fastbuild.sh install
 
 make -C EXA/src/ -f makefile.linux $* || exit 1
-if [ "$XSERVER_GREATER_THAN_13" != "1" ]; then
-  make -C DRI_1.10.4/src/ -f makefile.linux $* || exit 1
-fi
+#if [ "$XSERVER_GREATER_THAN_13" != "1" ]; then
+#  make -C DRI_1.10.4/src/ -f makefile.linux $* || exit 1
+#fi
 make -C FslExt/src/ -f makefile.linux $* || exit 1
 make -C util/autohdmi/ -f makefile.linux $* || exit 1
-make -C util/pandisplay/ -f makefile.linux $* || exit 1
 
 exit 0
 

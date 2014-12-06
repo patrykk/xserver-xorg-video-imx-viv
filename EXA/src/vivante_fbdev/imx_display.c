@@ -956,7 +956,7 @@ imxDisplayDeleteModes(DisplayModePtr modesList)
 		}
 
 		if (NULL != mode->name) {
-			free(mode->name);
+			free((char *) mode->name);
 		}
 		free(mode);
 	}
@@ -1538,11 +1538,14 @@ imxDisplayPreInit(ScrnInfoPtr pScrn)
 	}
 	// user may create a mode which is larger than native mode(s)
 	// SL/SX does not support larger xres_virtual; so we extend yres_virtual only
-	const int max_algined_width = IMX_ALIGN(1920, imxPtr->fbAlignWidth);
-	const int max_aligned_height = IMX_ALIGN(1080, imxPtr->fbAlignHeight);
-	const int max_size = max_algined_width * max_aligned_height * 2;
-	fbVarScreenInfo.yres_virtual = max_size / fbVarScreenInfo.xres_virtual + 2;
-	fbVarScreenInfo.bits_per_pixel = pScrn->bitsPerPixel;
+	//const int max_algined_width = IMX_ALIGN(1920, imxPtr->fbAlignWidth);
+	//const int max_aligned_height = IMX_ALIGN(1080, imxPtr->fbAlignHeight);
+	//const int max_size = max_algined_width * max_aligned_height * 2;
+	//fbVarScreenInfo.yres_virtual = max_size / fbVarScreenInfo.xres_virtual + 2;
+	fbVarScreenInfo.xres_virtual = max(IMX_ALIGN(fPtr->fbMaxWidth, imxPtr->fbAlignWidth), 1920);
+	fbVarScreenInfo.yres_virtual = max(IMX_ALIGN(fPtr->fbMaxHeight, imxPtr->fbAlignHeight), 1088) * 2;
+	fbVarScreenInfo.bits_per_pixel = 32;
+//	fbVarScreenInfo.bits_per_pixel = pScrn->bitsPerPixel;
 
 	if (0 != ioctl(fd, FBIOPUT_VSCREENINFO, &fbVarScreenInfo)) {
 		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
