@@ -1639,7 +1639,7 @@ RestoreSyncFlags(ScrnInfoPtr pScrn)
         const char *modeName = "current";
         unsigned int fbSync = 0;
         if(pScrn->currentMode)
-            modeName = pScrn->currentMode->name;
+            modeName = (char *)pScrn->currentMode->name;
 
         if(!imxLoadSyncFlags(pScrn, modeName, &fbSync)) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
